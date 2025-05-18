@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reaction Time Tester</title>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Monaco, Consolas, "Courier New", monospace;
+      background: url('1.png') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+    }
+    #reactionBox {
+      width: 200px;
+      height: 200px;
+      background-color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 20px;
+      transition: background-color 0.2s;
+      margin-top: 20px;
+    }
+    #stats {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+    #startText {
+      font-size: 2rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-decoration: underline;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background-color: #007bff;
+      color: white;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+  <div id="startText" onclick="startTest()">Start</div>
+  <div id="reactionBox">Wait for blue...</div>
+  <div id="stats">
+    <p>Last Reaction Time: <span id="last">-</span></p>
+    <p>Best Reaction Time: <span id="best">-</span></p>
+    <p>Total Attempts: <span id="attempts">0</span></p>
+    <button onclick="resetStats()">Reset Stats</button>
+  </div>
+
+  <script>
+    const box = document.getElementById('reactionBox');
+    const attemptsSpan = document.getElementById('attempts');
+    const bestSpan = document.getElementById('best');
+    const lastSpan = document.getElementById('last');
+    const clickSound = document.getElementById('clickSound');
+    const startText = document.getElementById('startText');
+
+    let startTime;
+    let timeout;
+    let reactionTimes = [];
+    let testActive = false;
+
+    function startTest() {
+      startText.style.display = 'none';
+      box.style.display = 'flex';
+      box.textContent = 'Wait for blue...';
+      box.style.backgroundColor = 'white';
+      testActive = true;
+      timeout = setTimeout(() => {
+        box.style.backgroundColor = 'blue';
+        box.textContent = 'Click now!';
+        startTime = new Date();
+      }, Math.random() * 3000 + 2000);
+    }
+
+    box.addEventListener('click', () => {
+      if (!testActive) return;
+
+      if (box.style.backgroundColor === 'blue') {
+        const reactionTime = (new Date() - startTime) / 1000;
+        reactionTimes.push(reactionTime);
+        clickSound.play();
+        lastSpan.textContent = `${reactionTime.toFixed(3)} seconds`;
+
+        const best = Math.min(...reactionTimes);
+        bestSpan.textContent = `${best.toFixed(3)} seconds`;
+
+        attemptsSpan.textContent = reactionTimes.length;
+
+        box.style.display = 'none';
+        testActive = false;
+        startText.style.display = 'block';
+      } else {
+        clearTimeout(timeout);
+        alert('Too soon! Wait for blue.');
+        testActive = false;
+        box.style.display = 'none';
+        startText.style.display = 'block';
+      }
+    });
+
+    function resetStats() {
+      reactionTimes = [];
+      bestSpan.textContent = '-';
+      lastSpan.textContent = '-';
+      attemptsSpan.textContent = '0';
+    }
+  </script>
+</body>
+</html>
